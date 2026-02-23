@@ -21,6 +21,7 @@ services:
       TICKETING_SQS_ACCESS_KEY: test
       TICKETING_SQS_SECRET_KEY: test
       TICKETING_SQS_QUEUE_NAME: ticketing-order-processing
+      TICKETING_SQS_PAYMENT_QUEUE_NAME: ticketing-payment-events
     depends_on:
       - mongodb
       - localstack

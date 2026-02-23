@@ -16,7 +16,7 @@ import org.junit.jupiter.api.Test;
 class OrderProcessingServiceTest {
 
     @Test
-    void shouldProcessReservedOrderAndMarkItAsSold() {
+    void shouldProcessReservedOrderAndMarkItAsPendingConfirmation() {
         InMemoryEventRepository eventRepository = new InMemoryEventRepository();
         InMemoryOrderRepository orderRepository = new InMemoryOrderRepository();
         MutableClock clock = new MutableClock(Instant.parse("2026-02-01T10:00:00Z"));
@@ -25,7 +25,6 @@ class OrderProcessingServiceTest {
         OrderProcessingService service = new OrderProcessingService(
             orderRepository,
             orderStateService,
-            inventoryService,
             clock
         );
 
@@ -48,9 +47,9 @@ class OrderProcessingServiceTest {
         Order updatedOrder = orderRepository.findById(order.id()).block();
         Event updatedEvent = eventRepository.findById(event.id()).block();
 
-        assertThat(updatedOrder.state()).isEqualTo(TicketState.SOLD);
-        assertThat(updatedEvent.soldTickets()).isEqualTo(3);
-        assertThat(updatedEvent.reservedTickets()).isZero();
+        assertThat(updatedOrder.state()).isEqualTo(TicketState.PENDING_CONFIRMATION);
+        assertThat(updatedEvent.soldTickets()).isZero();
+        assertThat(updatedEvent.reservedTickets()).isEqualTo(3);
     }
 
     @Test
@@ -63,7 +62,6 @@ class OrderProcessingServiceTest {
         OrderProcessingService service = new OrderProcessingService(
             orderRepository,
             orderStateService,
-            inventoryService,
             clock
         );
 

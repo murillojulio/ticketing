@@ -53,3 +53,20 @@ echo
 echo "5) Querying order state..."
 curl -sS "${BASE_URL}/api/orders/${ORDER_ID}"
 echo
+
+echo
+echo "6) Sending payment confirmation webhook..."
+curl -sS -X POST "${BASE_URL}/api/payments/webhook" \
+  -H "Content-Type: application/json" \
+  -d "{
+    \"orderId\": \"${ORDER_ID}\",
+    \"paymentId\": \"payment-123\",
+    \"status\": \"CONFIRMED\",
+    \"occurredAt\": \"2026-12-01T20:05:00Z\"
+  }"
+echo
+
+echo
+echo "7) Querying order state after payment event..."
+curl -sS "${BASE_URL}/api/orders/${ORDER_ID}"
+echo

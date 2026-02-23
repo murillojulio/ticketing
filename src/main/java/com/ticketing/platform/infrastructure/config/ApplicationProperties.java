@@ -91,6 +91,7 @@ public class ApplicationProperties {
         private String accessKey = "test";
         private String secretKey = "test";
         private String queueName = "ticketing-order-processing";
+        private String paymentQueueName = "ticketing-payment-events";
         private int maxMessages = 10;
         private int waitTimeSeconds = 10;
         private int visibilityTimeoutSeconds = 45;
@@ -134,6 +135,14 @@ public class ApplicationProperties {
 
         public void setQueueName(String queueName) {
             this.queueName = queueName;
+        }
+
+        public String getPaymentQueueName() {
+            return paymentQueueName;
+        }
+
+        public void setPaymentQueueName(String paymentQueueName) {
+            this.paymentQueueName = paymentQueueName;
         }
 
         public int getMaxMessages() {

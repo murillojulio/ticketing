@@ -14,18 +14,15 @@ public class OrderProcessingService implements OrderProcessingUseCase {
 
     private final OrderRepository orderRepository;
     private final OrderStateService orderStateService;
-    private final InventoryService inventoryService;
     private final ClockPort clockPort;
 
     public OrderProcessingService(
         OrderRepository orderRepository,
         OrderStateService orderStateService,
-        InventoryService inventoryService,
         ClockPort clockPort
     ) {
         this.orderRepository = orderRepository;
         this.orderStateService = orderStateService;
-        this.inventoryService = inventoryService;
         this.clockPort = clockPort;
     }
 
@@ -48,24 +45,9 @@ public class OrderProcessingService implements OrderProcessingUseCase {
                     current -> current.transitionTo(
                         TicketState.PENDING_CONFIRMATION,
                         clockPort.now(),
-                        "Order accepted for asynchronous processing"
+                        "Order accepted and waiting for payment confirmation"
                     )
-                ).flatMap(pendingOrder -> {
-                    if (pendingOrder.state() != TicketState.PENDING_CONFIRMATION) {
-                        return Mono.empty();
-                    }
-                    return inventoryService.confirmSale(pendingOrder.eventId(), pendingOrder.quantity())
-                        .then(orderStateService.transition(
-                            pendingOrder.id(),
-                            current -> current.state() == TicketState.PENDING_CONFIRMATION,
-                            current -> current.transitionTo(
-                                TicketState.SOLD,
-                                clockPort.now(),
-                                "Order confirmed and sold"
-                            )
-                        ))
-                        .then();
-                });
+                ).then();
             })
             .then();
     }

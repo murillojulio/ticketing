@@ -25,6 +25,7 @@ class ApplicationPropertiesTest {
         sqs.setAccessKey("test");
         sqs.setSecretKey("test");
         sqs.setQueueName("ticketing-order-processing");
+        sqs.setPaymentQueueName("ticketing-payment-events");
         sqs.setMaxMessages(5);
         sqs.setWaitTimeSeconds(8);
         sqs.setVisibilityTimeoutSeconds(60);
@@ -42,6 +43,7 @@ class ApplicationPropertiesTest {
         assertThat(properties.getSqs().getAccessKey()).isEqualTo("test");
         assertThat(properties.getSqs().getSecretKey()).isEqualTo("test");
         assertThat(properties.getSqs().getQueueName()).isEqualTo("ticketing-order-processing");
+        assertThat(properties.getSqs().getPaymentQueueName()).isEqualTo("ticketing-payment-events");
         assertThat(properties.getSqs().getMaxMessages()).isEqualTo(5);
         assertThat(properties.getSqs().getWaitTimeSeconds()).isEqualTo(8);
         assertThat(properties.getSqs().getVisibilityTimeoutSeconds()).isEqualTo(60);

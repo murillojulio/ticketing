@@ -13,7 +13,8 @@ Reactive backend for event ticketing with temporary reservations, asynchronous o
   - Orders reserve inventory immediately for a configurable hold period (default: 10 minutes)
 - Asynchronous order processing:
   - Orders are published to a queue adapter and processed asynchronously by a consumer
-  - Processing flow: `RESERVED -> PENDING_CONFIRMATION -> SOLD`
+  - Order preparation flow: `RESERVED -> PENDING_CONFIRMATION`
+  - Payment confirmation flow (webhook/event-driven): `PENDING_CONFIRMATION -> SOLD`
 - Order status query:
   - `GET /api/orders/{orderId}` returns full order state and audit trail
 - Concurrency control:
@@ -47,10 +48,10 @@ Reactive backend for event ticketing with temporary reservations, asynchronous o
 WebFlux Controllers
     -> Application Use Cases
         -> Domain Rules (Event, Order, transitions, audit)
-        -> Ports (EventRepository, OrderRepository, OrderQueuePort, ClockPort)
+        -> Ports (EventRepository, OrderRepository, OrderQueuePort, PaymentEventQueuePort, ClockPort)
             -> Infrastructure Adapters
                 - MongoDB repositories with conditional writes
-                - SQS adapter on LocalStack + async consumer with ack
+                - SQS adapters on LocalStack + async consumers with ack
                 - Scheduled expiration releaser
 ```
 
@@ -131,6 +132,19 @@ Services exposed:
 
 `GET /api/orders/{orderId}`
 
+### Payment webhook (publishes payment event)
+
+`POST /api/payments/webhook`
+
+```json
+{
+  "orderId": "replace-with-order-id",
+  "paymentId": "payment-123",
+  "status": "CONFIRMED",
+  "occurredAt": "2026-12-01T20:05:00Z"
+}
+```
+
 ## 5. cURL Collection
 
 See `scripts/curl-collection.sh`.
@@ -155,5 +169,6 @@ mvn verify
 - **Immutable domain models** simplify reasoning about state transitions
 - **Optimistic locking** is used to protect inventory consistency in concurrent scenarios
 - **Asynchronous order pipeline** decouples request latency from heavy processing
+- **Payment-driven finalization** moves orders to `SOLD` only after a payment event
 - **Scheduled release process** ensures temporary reservations never lock inventory indefinitely
 - **Port-driven architecture** keeps infrastructure replaceable (for example, switching between MongoDB/SQS and in-memory adapters by configuration)
