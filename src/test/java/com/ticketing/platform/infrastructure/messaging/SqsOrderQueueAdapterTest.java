@@ -20,8 +20,10 @@ import reactor.test.StepVerifier;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageResponse;
+import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageResponse;
@@ -36,7 +38,7 @@ class SqsOrderQueueAdapterTest {
     void shouldPublishMessagesToSqsQueue() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.getSqs().setQueueName("orders");
-        when(sqsAsyncClient.getQueueUrl(any())).thenReturn(
+        when(sqsAsyncClient.getQueueUrl(any(GetQueueUrlRequest.class))).thenReturn(
             CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("http://queue-url").build())
         );
         when(sqsAsyncClient.sendMessage(any(SendMessageRequest.class))).thenReturn(
@@ -57,7 +59,7 @@ class SqsOrderQueueAdapterTest {
     void shouldReceiveAndAcknowledgeMessages() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.getSqs().setPollIntervalMs(1000);
-        when(sqsAsyncClient.getQueueUrl(any())).thenReturn(
+        when(sqsAsyncClient.getQueueUrl(any(GetQueueUrlRequest.class))).thenReturn(
             CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("http://queue-url").build())
         );
 
@@ -67,7 +69,7 @@ class SqsOrderQueueAdapterTest {
             .receiptHandle("receipt-1")
             .messageId("id-1")
             .build();
-        when(sqsAsyncClient.receiveMessage(any())).thenReturn(
+        when(sqsAsyncClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(
             CompletableFuture.completedFuture(ReceiveMessageResponse.builder().messages(message).build())
         );
         when(sqsAsyncClient.deleteMessage(any(DeleteMessageRequest.class))).thenReturn(
@@ -91,7 +93,7 @@ class SqsOrderQueueAdapterTest {
     void shouldDeleteInvalidMessagesWithoutEmittingOrder() {
         ApplicationProperties properties = new ApplicationProperties();
         properties.getSqs().setPollIntervalMs(1000);
-        when(sqsAsyncClient.getQueueUrl(any())).thenReturn(
+        when(sqsAsyncClient.getQueueUrl(any(GetQueueUrlRequest.class))).thenReturn(
             CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("http://queue-url").build())
         );
         Message invalid = Message.builder()
@@ -99,7 +101,7 @@ class SqsOrderQueueAdapterTest {
             .receiptHandle("receipt-invalid")
             .messageId("invalid-id")
             .build();
-        when(sqsAsyncClient.receiveMessage(any())).thenReturn(
+        when(sqsAsyncClient.receiveMessage(any(ReceiveMessageRequest.class))).thenReturn(
             CompletableFuture.completedFuture(ReceiveMessageResponse.builder().messages(invalid).build())
         );
         when(sqsAsyncClient.deleteMessage(any(DeleteMessageRequest.class))).thenReturn(

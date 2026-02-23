@@ -14,7 +14,9 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.data.mongodb.core.FindAndReplaceOptions;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
+import org.springframework.data.mongodb.core.query.Query;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
@@ -84,7 +86,11 @@ class MongoOrderRepositoryTest {
             "Processing"
         );
 
-        when(mongoTemplate.findAndReplace(any(), any(OrderDocument.class), any()))
+        when(mongoTemplate.findAndReplace(
+            any(Query.class),
+            any(OrderDocument.class),
+            any(FindAndReplaceOptions.class)
+        ))
             .thenReturn(Mono.just(OrderDocument.fromDomain(updated)));
 
         Boolean success = repository.compareAndSet(current.id(), current.version(), updated).block();
