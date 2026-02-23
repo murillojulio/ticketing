@@ -18,11 +18,14 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import reactor.test.StepVerifier;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
+import software.amazon.awssdk.services.sqs.model.CreateQueueResponse;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageResponse;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlResponse;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageResponse;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -115,5 +118,27 @@ class SqsOrderQueueAdapterTest {
             .verify(Duration.ofSeconds(2));
 
         verify(sqsAsyncClient, times(1)).deleteMessage(any(DeleteMessageRequest.class));
+    }
+
+    @Test
+    void shouldCreateQueueWhenQueueDoesNotExist() {
+        ApplicationProperties properties = new ApplicationProperties();
+        properties.getSqs().setQueueName("orders");
+        when(sqsAsyncClient.getQueueUrl(any(GetQueueUrlRequest.class))).thenReturn(
+            CompletableFuture.failedFuture(QueueDoesNotExistException.builder().message("missing queue").build()),
+            CompletableFuture.completedFuture(GetQueueUrlResponse.builder().queueUrl("http://queue-url").build())
+        );
+        when(sqsAsyncClient.createQueue(any(CreateQueueRequest.class))).thenReturn(
+            CompletableFuture.completedFuture(CreateQueueResponse.builder().queueUrl("http://queue-url").build())
+        );
+        when(sqsAsyncClient.sendMessage(any(SendMessageRequest.class))).thenReturn(
+            CompletableFuture.completedFuture(SendMessageResponse.builder().messageId("m1").build())
+        );
+
+        SqsOrderQueueAdapter adapter = new SqsOrderQueueAdapter(sqsAsyncClient, properties);
+        adapter.publish(UUID.randomUUID()).block();
+
+        verify(sqsAsyncClient, times(1)).createQueue(any(CreateQueueRequest.class));
+        verify(sqsAsyncClient, times(2)).getQueueUrl(any(GetQueueUrlRequest.class));
     }
 }

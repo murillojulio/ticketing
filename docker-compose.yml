@@ -42,5 +42,3 @@ services:
       SERVICES: sqs
       AWS_DEFAULT_REGION: us-east-1
       DEBUG: 0
-    volumes:
-      - ./localstack-init:/etc/localstack/init/ready.d

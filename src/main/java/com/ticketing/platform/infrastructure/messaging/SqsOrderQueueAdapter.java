@@ -3,6 +3,7 @@ package com.ticketing.platform.infrastructure.messaging;
 import com.ticketing.platform.application.port.out.OrderQueuePort;
 import com.ticketing.platform.infrastructure.config.ApplicationProperties;
 import java.time.Duration;
+import java.util.Map;
 import java.util.UUID;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,9 +13,11 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.util.retry.Retry;
 import software.amazon.awssdk.services.sqs.SqsAsyncClient;
+import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
 
@@ -102,8 +105,40 @@ public class SqsOrderQueueAdapter implements OrderQueuePort {
             .map(response -> response.queueUrl());
     }
 
-    private Mono<String> queueUrl() {
+    private Mono<String> resolveOrCreateQueueUrl() {
         return resolveQueueUrl()
+            .onErrorResume(this::isQueueMissingError, error -> createQueueIfMissing().then(resolveQueueUrl()));
+    }
+
+    private Mono<Void> createQueueIfMissing() {
+        ApplicationProperties.Sqs sqsProperties = applicationProperties.getSqs();
+        return Mono.fromFuture(sqsAsyncClient.createQueue(
+                CreateQueueRequest.builder()
+                    .queueName(sqsProperties.getQueueName())
+                    .attributes(Map.of(
+                        "VisibilityTimeout", String.valueOf(sqsProperties.getVisibilityTimeoutSeconds()),
+                        "MessageRetentionPeriod", "1209600"
+                    ))
+                    .build()
+            ))
+            .doOnNext(response -> LOGGER.info("SQS queue '{}' is ready at {}", sqsProperties.getQueueName(), response.queueUrl()))
+            .then();
+    }
+
+    private boolean isQueueMissingError(Throwable error) {
+        Throwable current = error;
+        while (current != null) {
+            if (current instanceof QueueDoesNotExistException) {
+                LOGGER.warn("SQS queue '{}' not found. Creating it automatically.", applicationProperties.getSqs().getQueueName());
+                return true;
+            }
+            current = current.getCause();
+        }
+        return false;
+    }
+
+    private Mono<String> queueUrl() {
+        return resolveOrCreateQueueUrl()
             .retryWhen(Retry.backoff(20, Duration.ofMillis(250)));
     }
 }
