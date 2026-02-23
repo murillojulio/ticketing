@@ -25,6 +25,7 @@ class OrderProcessingServiceTest {
         OrderProcessingService service = new OrderProcessingService(
             orderRepository,
             orderStateService,
+            inventoryService,
             clock
         );
 
@@ -62,6 +63,7 @@ class OrderProcessingServiceTest {
         OrderProcessingService service = new OrderProcessingService(
             orderRepository,
             orderStateService,
+            inventoryService,
             clock
         );
 

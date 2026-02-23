@@ -14,15 +14,18 @@ public class OrderProcessingService implements OrderProcessingUseCase {
 
     private final OrderRepository orderRepository;
     private final OrderStateService orderStateService;
+    private final InventoryService inventoryService;
     private final ClockPort clockPort;
 
     public OrderProcessingService(
         OrderRepository orderRepository,
         OrderStateService orderStateService,
+        InventoryService inventoryService,
         ClockPort clockPort
     ) {
         this.orderRepository = orderRepository;
         this.orderStateService = orderStateService;
+        this.inventoryService = inventoryService;
         this.clockPort = clockPort;
     }
 
