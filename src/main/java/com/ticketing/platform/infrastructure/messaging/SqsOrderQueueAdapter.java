@@ -17,6 +17,7 @@ import software.amazon.awssdk.services.sqs.model.CreateQueueRequest;
 import software.amazon.awssdk.services.sqs.model.DeleteMessageRequest;
 import software.amazon.awssdk.services.sqs.model.GetQueueUrlRequest;
 import software.amazon.awssdk.services.sqs.model.Message;
+import software.amazon.awssdk.services.sqs.model.QueueAttributeName;
 import software.amazon.awssdk.services.sqs.model.QueueDoesNotExistException;
 import software.amazon.awssdk.services.sqs.model.ReceiveMessageRequest;
 import software.amazon.awssdk.services.sqs.model.SendMessageRequest;
@@ -116,8 +117,8 @@ public class SqsOrderQueueAdapter implements OrderQueuePort {
                 CreateQueueRequest.builder()
                     .queueName(sqsProperties.getQueueName())
                     .attributes(Map.of(
-                        "VisibilityTimeout", String.valueOf(sqsProperties.getVisibilityTimeoutSeconds()),
-                        "MessageRetentionPeriod", "1209600"
+                        QueueAttributeName.VISIBILITY_TIMEOUT, String.valueOf(sqsProperties.getVisibilityTimeoutSeconds()),
+                        QueueAttributeName.MESSAGE_RETENTION_PERIOD, "1209600"
                     ))
                     .build()
             ))
