@@ -1,0 +1,12 @@
+spring:
+  application:
+    name: reactive-ticketing-platform
+
+server:
+  port: 8080
+
+ticketing:
+  reservation-hold: PT10M
+  queue-retry-attempts: 3
+  consumer-concurrency: 4
+  expiration-check-interval-ms: 30000
