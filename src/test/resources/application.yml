@@ -1,0 +1,4 @@
+ticketing:
+  adapters:
+    persistence: inmemory
+    queue: inmemory

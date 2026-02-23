@@ -2,12 +2,14 @@ package com.ticketing.platform.infrastructure.messaging;
 
 import com.ticketing.platform.application.port.out.OrderQueuePort;
 import java.util.UUID;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Component;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 import reactor.core.publisher.Sinks;
 
 @Component
+@ConditionalOnProperty(prefix = "ticketing.adapters", name = "queue", havingValue = "inmemory")
 public class ReactorOrderQueueAdapter implements OrderQueuePort {
 
     private final Sinks.Many<UUID> sink = Sinks.many().unicast().onBackpressureBuffer();
@@ -22,7 +24,8 @@ public class ReactorOrderQueueAdapter implements OrderQueuePort {
     }
 
     @Override
-    public Flux<UUID> receive() {
-        return sink.asFlux();
+    public Flux<OrderQueueMessage> receive() {
+        return sink.asFlux()
+            .map(orderId -> new OrderQueueMessage(orderId, Mono.empty()));
     }
 }

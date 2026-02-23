@@ -8,5 +8,11 @@ public interface OrderQueuePort {
 
     Mono<Void> publish(UUID orderId);
 
-    Flux<UUID> receive();
+    Flux<OrderQueueMessage> receive();
+
+    record OrderQueueMessage(
+        UUID orderId,
+        Mono<Void> acknowledge
+    ) {
+    }
 }

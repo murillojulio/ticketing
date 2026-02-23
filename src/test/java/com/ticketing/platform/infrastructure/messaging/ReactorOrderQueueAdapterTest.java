@@ -16,7 +16,7 @@ class ReactorOrderQueueAdapterTest {
 
         StepVerifier.create(queue.receive().take(1))
             .then(() -> queue.publish(orderId).block())
-            .expectNext(orderId)
+            .assertNext(message -> assertThat(message.orderId()).isEqualTo(orderId))
             .expectComplete()
             .verify(Duration.ofSeconds(2));
     }
@@ -32,7 +32,8 @@ class ReactorOrderQueueAdapterTest {
                 queue.publish(first).block();
                 queue.publish(second).block();
             })
-            .expectNext(first, second)
+            .assertNext(message -> assertThat(message.orderId()).isEqualTo(first))
+            .assertNext(message -> assertThat(message.orderId()).isEqualTo(second))
             .verifyComplete();
 
         assertThat(first).isNotEqualTo(second);

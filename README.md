@@ -39,7 +39,7 @@ Reactive backend for event ticketing with temporary reservations, asynchronous o
   - Conditional writes via version-based compare-and-set
 - Dockerized delivery:
   - `Dockerfile`
-  - `docker-compose.yml` with app + DynamoDB Local + LocalStack (SQS service)
+  - `docker-compose.yml` with app + MongoDB + LocalStack (SQS service)
 
 ## 2. Architecture
 
@@ -49,8 +49,8 @@ WebFlux Controllers
         -> Domain Rules (Event, Order, transitions, audit)
         -> Ports (EventRepository, OrderRepository, OrderQueuePort, ClockPort)
             -> Infrastructure Adapters
-                - In-memory optimistic repositories
-                - Reactor queue adapter + async consumer
+                - MongoDB repositories with conditional writes
+                - SQS adapter on LocalStack + async consumer with ack
                 - Scheduled expiration releaser
 ```
 
@@ -89,7 +89,7 @@ docker compose up --build
 Services exposed:
 
 - App: `localhost:8080`
-- DynamoDB Local: `localhost:8000`
+- MongoDB: `localhost:27017`
 - LocalStack (SQS): `localhost:4566`
 
 ## 4. Main Endpoints
@@ -156,4 +156,4 @@ mvn verify
 - **Optimistic locking** is used to protect inventory consistency in concurrent scenarios
 - **Asynchronous order pipeline** decouples request latency from heavy processing
 - **Scheduled release process** ensures temporary reservations never lock inventory indefinitely
-- **Port-driven architecture** keeps infrastructure replaceable (for example, swapping in DynamoDB/SQS adapters)
+- **Port-driven architecture** keeps infrastructure replaceable (for example, switching between MongoDB/SQS and in-memory adapters by configuration)

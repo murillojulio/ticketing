@@ -37,17 +37,20 @@ public class OrderQueueConsumer {
     @PostConstruct
     public void start() {
         consumerSubscription = orderQueuePort.receive()
-            .flatMap(orderId -> orderProcessingUseCase.processOrder(orderId)
-                .retryWhen(
-                    Retry.backoff(
-                        applicationProperties.getQueueRetryAttempts(),
-                        Duration.ofMillis(120)
+            .flatMap(message -> orderProcessingUseCase.processOrder(message.orderId())
+                    .retryWhen(
+                        Retry.backoff(
+                            applicationProperties.getQueueRetryAttempts(),
+                            Duration.ofMillis(120)
+                        )
                     )
-                )
-                .onErrorResume(error -> {
-                    LOGGER.error("Asynchronous order processing failed for order {}", orderId, error);
-                    return Mono.empty();
-                }), applicationProperties.getConsumerConcurrency())
+                    .then(message.acknowledge())
+                    .onErrorResume(error -> {
+                        LOGGER.error("Asynchronous order processing failed for order {}", message.orderId(), error);
+                        return Mono.empty();
+                    }),
+                applicationProperties.getConsumerConcurrency()
+            )
             .subscribe();
     }
 

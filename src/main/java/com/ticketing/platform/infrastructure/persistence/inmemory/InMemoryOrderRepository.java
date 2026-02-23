@@ -9,11 +9,13 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.atomic.AtomicBoolean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
+@ConditionalOnProperty(prefix = "ticketing.adapters", name = "persistence", havingValue = "inmemory")
 public class InMemoryOrderRepository implements OrderRepository {
 
     private final ConcurrentMap<UUID, Order> orders = new ConcurrentHashMap<>();
