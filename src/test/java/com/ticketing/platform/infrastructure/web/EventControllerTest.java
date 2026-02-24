@@ -10,8 +10,9 @@ import com.ticketing.platform.domain.model.Event;
 import java.time.Instant;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
-import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.autoconfigure.security.reactive.ReactiveSecurityAutoConfiguration;
+import org.springframework.boot.autoconfigure.security.reactive.ReactiveUserDetailsServiceAutoConfiguration;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.context.annotation.Import;
@@ -20,8 +21,13 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
-@WebFluxTest(controllers = EventController.class)
-@AutoConfigureWebTestClient(addFilters = false)
+@WebFluxTest(
+    controllers = EventController.class,
+    excludeAutoConfiguration = {
+        ReactiveSecurityAutoConfiguration.class,
+        ReactiveUserDetailsServiceAutoConfiguration.class
+    }
+)
 @Import(GlobalExceptionHandler.class)
 class EventControllerTest {
 
