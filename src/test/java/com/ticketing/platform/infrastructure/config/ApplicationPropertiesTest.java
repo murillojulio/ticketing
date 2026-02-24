@@ -31,6 +31,13 @@ class ApplicationPropertiesTest {
         sqs.setVisibilityTimeoutSeconds(60);
         sqs.setPollIntervalMs(250);
         properties.setSqs(sqs);
+        ApplicationProperties.Security security = new ApplicationProperties.Security();
+        security.setEnabled(true);
+        ApplicationProperties.Jwt jwt = new ApplicationProperties.Jwt();
+        jwt.setSecret("this-is-a-long-test-secret-with-at-least-thirty-two-bytes");
+        jwt.setExpirationMinutes(90);
+        security.setJwt(jwt);
+        properties.setSecurity(security);
 
         assertThat(properties.getReservationHold()).isEqualTo(Duration.ofMinutes(15));
         assertThat(properties.getQueueRetryAttempts()).isEqualTo(5);
@@ -48,5 +55,10 @@ class ApplicationPropertiesTest {
         assertThat(properties.getSqs().getWaitTimeSeconds()).isEqualTo(8);
         assertThat(properties.getSqs().getVisibilityTimeoutSeconds()).isEqualTo(60);
         assertThat(properties.getSqs().getPollIntervalMs()).isEqualTo(250);
+        assertThat(properties.getSecurity().isEnabled()).isTrue();
+        assertThat(properties.getSecurity().getJwt().getSecret()).isEqualTo(
+            "this-is-a-long-test-secret-with-at-least-thirty-two-bytes"
+        );
+        assertThat(properties.getSecurity().getJwt().getExpirationMinutes()).isEqualTo(90);
     }
 }

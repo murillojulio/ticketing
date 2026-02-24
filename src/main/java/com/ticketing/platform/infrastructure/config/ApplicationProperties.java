@@ -13,6 +13,7 @@ public class ApplicationProperties {
     private long expirationCheckIntervalMs = 30_000;
     private Adapters adapters = new Adapters();
     private Sqs sqs = new Sqs();
+    private Security security = new Security();
 
     public Duration getReservationHold() {
         return reservationHold;
@@ -60,6 +61,14 @@ public class ApplicationProperties {
 
     public void setSqs(Sqs sqs) {
         this.sqs = sqs;
+    }
+
+    public Security getSecurity() {
+        return security;
+    }
+
+    public void setSecurity(Security security) {
+        this.security = security;
     }
 
     public static class Adapters {
@@ -175,6 +184,50 @@ public class ApplicationProperties {
 
         public void setPollIntervalMs(long pollIntervalMs) {
             this.pollIntervalMs = pollIntervalMs;
+        }
+    }
+
+    public static class Security {
+
+        private boolean enabled = true;
+        private Jwt jwt = new Jwt();
+
+        public boolean isEnabled() {
+            return enabled;
+        }
+
+        public void setEnabled(boolean enabled) {
+            this.enabled = enabled;
+        }
+
+        public Jwt getJwt() {
+            return jwt;
+        }
+
+        public void setJwt(Jwt jwt) {
+            this.jwt = jwt;
+        }
+    }
+
+    public static class Jwt {
+
+        private String secret = "change-this-default-secret-to-a-very-long-random-value-at-least-thirty-two-bytes";
+        private long expirationMinutes = 60;
+
+        public String getSecret() {
+            return secret;
+        }
+
+        public void setSecret(String secret) {
+            this.secret = secret;
+        }
+
+        public long getExpirationMinutes() {
+            return expirationMinutes;
+        }
+
+        public void setExpirationMinutes(long expirationMinutes) {
+            this.expirationMinutes = expirationMinutes;
         }
     }
 }
