@@ -7,6 +7,7 @@ import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 
 @SpringBootTest(
@@ -34,6 +35,7 @@ class SecurityIntegrationTest {
     void shouldAllowPaymentWebhookWithoutAuthentication() {
         webTestClient.post()
             .uri("/api/payments/webhook")
+            .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""
                 {
                   "orderId": "11111111-1111-1111-1111-111111111111",
@@ -51,6 +53,7 @@ class SecurityIntegrationTest {
         String email = "user-" + UUID.randomUUID() + "@example.com";
         AuthResponse authResponse = webTestClient.post()
             .uri("/api/auth/register")
+            .contentType(MediaType.APPLICATION_JSON)
             .bodyValue("""
                 {
                   "email": "%s",

@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.ticketing.platform.application.port.in.PaymentWebhookUseCase;
 import com.ticketing.platform.domain.exception.DomainException;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -15,6 +16,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 @WebFluxTest(controllers = PaymentWebhookController.class)
+@AutoConfigureWebTestClient(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class PaymentWebhookControllerTest {
 

@@ -8,6 +8,7 @@ import com.ticketing.platform.application.port.in.AuthUseCase;
 import com.ticketing.platform.domain.exception.DomainException;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
+import org.springframework.boot.test.autoconfigure.web.reactive.AutoConfigureWebTestClient;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.reactive.WebFluxTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -17,6 +18,7 @@ import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
 @WebFluxTest(controllers = AuthController.class)
+@AutoConfigureWebTestClient(addFilters = false)
 @Import(GlobalExceptionHandler.class)
 class AuthControllerTest {
 
