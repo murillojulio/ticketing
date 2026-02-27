@@ -26,6 +26,16 @@ services:
       - mongodb
       - localstack
 
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: reactive-ticketing-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
+
   mongodb:
     image: mongo:8.0
     container_name: reactive-ticketing-mongodb
