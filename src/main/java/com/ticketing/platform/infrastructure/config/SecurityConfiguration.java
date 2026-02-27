@@ -1,8 +1,11 @@
 package com.ticketing.platform.infrastructure.config;
 
+import com.ticketing.platform.application.port.out.RoleRepository;
+import com.ticketing.platform.domain.model.Role;
 import com.ticketing.platform.infrastructure.security.JwtPrincipal;
 import com.ticketing.platform.infrastructure.security.JwtTokenService;
 import java.util.List;
+import java.util.ArrayList;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -10,6 +13,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.ReactiveAuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.config.annotation.method.configuration.EnableReactiveMethodSecurity;
 import org.springframework.security.config.annotation.web.reactive.EnableWebFluxSecurity;
 import org.springframework.security.config.web.server.SecurityWebFiltersOrder;
 import org.springframework.security.config.web.server.ServerHttpSecurity;
@@ -19,51 +23,57 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.web.server.SecurityWebFilterChain;
 import org.springframework.security.web.server.authentication.AuthenticationWebFilter;
 import org.springframework.security.web.server.context.NoOpServerSecurityContextRepository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Configuration
 @EnableWebFluxSecurity
+@EnableReactiveMethodSecurity
 @ConditionalOnProperty(prefix = "ticketing.security", name = "enabled", havingValue = "true", matchIfMissing = true)
 public class SecurityConfiguration {
 
     @Bean
     public SecurityWebFilterChain securityWebFilterChain(
-        ServerHttpSecurity http,
-        JwtTokenService jwtTokenService
-    ) {
-        AuthenticationWebFilter jwtFilter = new AuthenticationWebFilter(reactiveAuthenticationManager(jwtTokenService));
+            ServerHttpSecurity http,
+            JwtTokenService jwtTokenService,
+            RoleRepository roleRepository) {
+        AuthenticationWebFilter jwtFilter = new AuthenticationWebFilter(
+                reactiveAuthenticationManager(jwtTokenService, roleRepository));
         jwtFilter.setServerAuthenticationConverter(this::extractBearerToken);
         jwtFilter.setSecurityContextRepository(NoOpServerSecurityContextRepository.getInstance());
 
         return http
-            .csrf(ServerHttpSecurity.CsrfSpec::disable)
-            .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
-            .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
-            .logout(ServerHttpSecurity.LogoutSpec::disable)
-            .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
-            .authorizeExchange(exchange -> exchange
-                .pathMatchers("/api/auth/**").permitAll()
-                .pathMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
-                .pathMatchers("/actuator/**").permitAll()
-                .anyExchange().authenticated()
-            )
-            .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
-            .build();
+                .csrf(ServerHttpSecurity.CsrfSpec::disable)
+                .httpBasic(ServerHttpSecurity.HttpBasicSpec::disable)
+                .formLogin(ServerHttpSecurity.FormLoginSpec::disable)
+                .logout(ServerHttpSecurity.LogoutSpec::disable)
+                .securityContextRepository(NoOpServerSecurityContextRepository.getInstance())
+                .authorizeExchange(exchange -> exchange
+                        .pathMatchers("/api/auth/**").permitAll()
+                        .pathMatchers(HttpMethod.POST, "/api/payments/webhook").permitAll()
+                        .pathMatchers("/actuator/**").permitAll()
+                        .anyExchange().authenticated())
+                .addFilterAt(jwtFilter, SecurityWebFiltersOrder.AUTHENTICATION)
+                .build();
     }
 
-    private ReactiveAuthenticationManager reactiveAuthenticationManager(JwtTokenService jwtTokenService) {
+    private ReactiveAuthenticationManager reactiveAuthenticationManager(JwtTokenService jwtTokenService,
+            RoleRepository roleRepository) {
         return authentication -> {
             String token = String.valueOf(authentication.getCredentials());
             return jwtTokenService.parse(token)
-                .map(this::toAuthentication);
+                    .flatMap(principal -> Flux.fromIterable(principal.roles())
+                            .flatMap(roleRepository::findByName)
+                            .flatMapIterable(Role::permissions)
+                            .map(perm -> (GrantedAuthority) new SimpleGrantedAuthority(perm))
+                            .collectList()
+                            .map(authorities -> {
+                                List<GrantedAuthority> allAuthorities = new ArrayList<>(authorities);
+                                principal.roles()
+                                        .forEach(r -> allAuthorities.add(new SimpleGrantedAuthority("ROLE_" + r)));
+                                return new UsernamePasswordAuthenticationToken(principal, null, allAuthorities);
+                            }));
         };
-    }
-
-    private Authentication toAuthentication(JwtPrincipal principal) {
-        List<GrantedAuthority> authorities = List.of(
-            new SimpleGrantedAuthority("ROLE_" + principal.role())
-        );
-        return new UsernamePasswordAuthenticationToken(principal, null, authorities);
     }
 
     private Mono<Authentication> extractBearerToken(org.springframework.web.server.ServerWebExchange exchange) {

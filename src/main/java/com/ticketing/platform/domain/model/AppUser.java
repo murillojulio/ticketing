@@ -2,14 +2,14 @@ package com.ticketing.platform.domain.model;
 
 import com.ticketing.platform.domain.exception.DomainException;
 import java.util.Locale;
+import java.util.Set;
 import java.util.UUID;
 
 public record AppUser(
-    UUID id,
-    String email,
-    String passwordHash,
-    String role
-) {
+        UUID id,
+        String email,
+        String passwordHash,
+        Set<String> roles) {
 
     public AppUser {
         if (id == null) {
@@ -21,18 +21,17 @@ public record AppUser(
         if (passwordHash == null || passwordHash.isBlank()) {
             throw new DomainException("User password hash is required");
         }
-        if (role == null || role.isBlank()) {
-            throw new DomainException("User role is required");
+        if (roles == null || roles.isEmpty()) {
+            throw new DomainException("User roles are required");
         }
     }
 
     public static AppUser create(UUID id, String email, String passwordHash) {
         return new AppUser(
-            id,
-            normalizeEmail(email),
-            passwordHash,
-            "USER"
-        );
+                id,
+                normalizeEmail(email),
+                passwordHash,
+                Set.of("USER"));
     }
 
     public static String normalizeEmail(String email) {

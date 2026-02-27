@@ -25,7 +25,7 @@ class JwtTokenServiceTest {
         assertThat(token).isNotBlank();
         assertThat(principal.email()).isEqualTo("user@example.com");
         assertThat(principal.userId()).isEqualTo(user.id());
-        assertThat(principal.role()).isEqualTo("USER");
+        assertThat(principal.roles()).containsExactly("USER");
     }
 
     @Test
@@ -35,6 +35,6 @@ class JwtTokenServiceTest {
         JwtTokenService jwtTokenService = new JwtTokenService(properties);
 
         assertThatThrownBy(() -> jwtTokenService.parse("invalid-token").block())
-            .isInstanceOf(BadCredentialsException.class);
+                .isInstanceOf(BadCredentialsException.class);
     }
 }

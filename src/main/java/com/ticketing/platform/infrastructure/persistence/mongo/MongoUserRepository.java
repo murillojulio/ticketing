@@ -2,6 +2,7 @@ package com.ticketing.platform.infrastructure.persistence.mongo;
 
 import com.ticketing.platform.application.port.out.UserRepository;
 import com.ticketing.platform.domain.model.AppUser;
+import java.util.UUID;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
@@ -22,13 +23,25 @@ public class MongoUserRepository implements UserRepository {
     @Override
     public Mono<AppUser> create(AppUser user) {
         return mongoTemplate.insert(UserDocument.fromDomain(user))
-            .map(UserDocument::toDomain);
+                .map(UserDocument::toDomain);
     }
 
     @Override
     public Mono<AppUser> findByEmail(String email) {
         Query query = Query.query(Criteria.where("email").is(AppUser.normalizeEmail(email)));
         return mongoTemplate.findOne(query, UserDocument.class)
-            .map(UserDocument::toDomain);
+                .map(UserDocument::toDomain);
+    }
+
+    @Override
+    public Mono<AppUser> update(AppUser user) {
+        return mongoTemplate.save(UserDocument.fromDomain(user))
+                .map(UserDocument::toDomain);
+    }
+
+    @Override
+    public Mono<AppUser> findById(UUID id) {
+        return mongoTemplate.findById(id.toString(), UserDocument.class)
+                .map(UserDocument::toDomain);
     }
 }

@@ -11,6 +11,8 @@ import java.nio.charset.StandardCharsets;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 import java.util.Date;
+import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import javax.crypto.SecretKey;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -35,35 +37,33 @@ public class JwtTokenService implements AuthTokenPort {
             Instant now = Instant.now();
             Instant expiration = now.plus(expirationMinutes, ChronoUnit.MINUTES);
             return Jwts.builder()
-                .subject(user.email())
-                .claim("uid", user.id().toString())
-                .claim("role", user.role())
-                .issuedAt(Date.from(now))
-                .expiration(Date.from(expiration))
-                .signWith(secretKey)
-                .compact();
+                    .subject(user.email())
+                    .claim("uid", user.id().toString())
+                    .claim("roles", user.roles())
+                    .issuedAt(Date.from(now))
+                    .expiration(Date.from(expiration))
+                    .signWith(secretKey)
+                    .compact();
         });
     }
 
     public Mono<JwtPrincipal> parse(String token) {
         return Mono.fromSupplier(() -> {
-                Claims claims = Jwts.parser()
+            Claims claims = Jwts.parser()
                     .verifyWith(secretKey)
                     .build()
                     .parseSignedClaims(token)
                     .getPayload();
-                String email = claims.getSubject();
-                String userId = claims.get("uid", String.class);
-                String role = claims.get("role", String.class);
-                return new JwtPrincipal(
+            String email = claims.getSubject();
+            String userId = claims.get("uid", String.class);
+            List<String> rolesList = claims.get("roles", List.class);
+            return new JwtPrincipal(
                     UUID.fromString(userId),
                     email,
-                    role
-                );
-            })
-            .onErrorMap(
-                error -> error instanceof JwtException || error instanceof IllegalArgumentException,
-                error -> new BadCredentialsException("Invalid JWT token", error)
-            );
+                    rolesList != null ? Set.copyOf(rolesList) : Set.of());
+        })
+                .onErrorMap(
+                        error -> error instanceof JwtException || error instanceof IllegalArgumentException,
+                        error -> new BadCredentialsException("Invalid JWT token", error));
     }
 }

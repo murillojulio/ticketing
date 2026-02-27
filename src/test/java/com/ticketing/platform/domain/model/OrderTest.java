@@ -17,37 +17,34 @@ class OrderTest {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
 
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            2,
-            now,
-            Duration.ofMinutes(10)
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                2,
+                now,
+                Duration.ofMinutes(10));
 
         assertThat(order.state()).isEqualTo(TicketState.RESERVED);
         assertThat(order.expiresAt()).isEqualTo(now.plus(Duration.ofMinutes(10)));
         assertThat(order.auditTrail()).hasSize(1);
-        assertThat(order.auditTrail().getFirst().toState()).isEqualTo(TicketState.RESERVED);
+        assertThat(order.auditTrail().get(0).toState()).isEqualTo(TicketState.RESERVED);
     }
 
     @Test
     void shouldTransitionFromReservedToSoldThroughPending() {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            2,
-            now,
-            Duration.ofMinutes(10)
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                2,
+                now,
+                Duration.ofMinutes(10));
 
         Order pending = order.transitionTo(
-            TicketState.PENDING_CONFIRMATION,
-            now.plusSeconds(1),
-            "Processing"
-        );
+                TicketState.PENDING_CONFIRMATION,
+                now.plusSeconds(1),
+                "Processing");
         Order sold = pending.transitionTo(TicketState.SOLD, now.plusSeconds(2), "Confirmed");
 
         assertThat(sold.state()).isEqualTo(TicketState.SOLD);
@@ -59,40 +56,36 @@ class OrderTest {
     void shouldRejectInvalidTransition() {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            2,
-            now,
-            Duration.ofMinutes(10)
-        ).transitionTo(
-            TicketState.PENDING_CONFIRMATION,
-            now.plusSeconds(1),
-            "Processing"
-        ).transitionTo(
-            TicketState.SOLD,
-            now.plusSeconds(2),
-            "Confirmed"
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                2,
+                now,
+                Duration.ofMinutes(10)).transitionTo(
+                        TicketState.PENDING_CONFIRMATION,
+                        now.plusSeconds(1),
+                        "Processing")
+                .transitionTo(
+                        TicketState.SOLD,
+                        now.plusSeconds(2),
+                        "Confirmed");
 
         assertThatThrownBy(() -> order.transitionTo(
-            TicketState.AVAILABLE,
-            now.plusSeconds(3),
-            "Rollback"
-        )).isInstanceOf(InvalidStateTransitionException.class);
+                TicketState.AVAILABLE,
+                now.plusSeconds(3),
+                "Rollback")).isInstanceOf(InvalidStateTransitionException.class);
     }
 
     @Test
     void shouldDetectExpiredOrder() {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            1,
-            now,
-            Duration.ofMinutes(5)
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                1,
+                now,
+                Duration.ofMinutes(5));
 
         assertThat(order.isExpired(now.plus(Duration.ofMinutes(6)))).isTrue();
         assertThat(order.isExpired(now.plus(Duration.ofMinutes(1)))).isFalse();
@@ -102,13 +95,12 @@ class OrderTest {
     void shouldReturnSameInstanceWhenTransitioningToSameState() {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            1,
-            now,
-            Duration.ofMinutes(5)
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                1,
+                now,
+                Duration.ofMinutes(5));
 
         Order unchanged = order.transitionTo(TicketState.RESERVED, now.plusSeconds(5), "No-op");
 
@@ -119,13 +111,12 @@ class OrderTest {
     void shouldAllowAvailableToComplimentaryTransition() {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
         Order order = Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            1,
-            now,
-            Duration.ofMinutes(5)
-        );
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                1,
+                now,
+                Duration.ofMinutes(5));
 
         Order available = order.transitionTo(TicketState.AVAILABLE, now.plusSeconds(30), "Expired");
         Order complimentary = available.transitionTo(TicketState.COMPLIMENTARY, now.plusSeconds(31), "Courtesy");
@@ -139,13 +130,12 @@ class OrderTest {
         Instant now = Instant.parse("2026-01-01T10:00:00Z");
 
         assertThatThrownBy(() -> Order.reserve(
-            UUID.randomUUID(),
-            UUID.randomUUID(),
-            "customer-1",
-            1,
-            now,
-            Duration.ZERO
-        )).isInstanceOf(DomainException.class)
-            .hasMessageContaining("hold duration");
+                UUID.randomUUID(),
+                UUID.randomUUID(),
+                "customer-1",
+                1,
+                now,
+                Duration.ZERO)).isInstanceOf(DomainException.class)
+                .hasMessageContaining("hold duration");
     }
 }

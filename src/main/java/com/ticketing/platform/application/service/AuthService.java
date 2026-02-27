@@ -21,10 +21,9 @@ public class AuthService implements AuthUseCase {
     private final AuthTokenPort authTokenPort;
 
     public AuthService(
-        UserRepository userRepository,
-        PasswordHasherPort passwordHasherPort,
-        AuthTokenPort authTokenPort
-    ) {
+            UserRepository userRepository,
+            PasswordHasherPort passwordHasherPort,
+            AuthTokenPort authTokenPort) {
         this.userRepository = userRepository;
         this.passwordHasherPort = passwordHasherPort;
         this.authTokenPort = authTokenPort;
@@ -36,16 +35,15 @@ public class AuthService implements AuthUseCase {
             validateCredentials(command.email(), command.password());
             String normalizedEmail = AppUser.normalizeEmail(command.email());
             return userRepository.findByEmail(normalizedEmail)
-                .flatMap(existingUser -> Mono.<AppUser>error(new DomainException("User already exists")))
-                .switchIfEmpty(Mono.defer(() -> {
-                    AppUser newUser = AppUser.create(
-                        UUID.randomUUID(),
-                        normalizedEmail,
-                        passwordHasherPort.hash(command.password())
-                    );
-                    return userRepository.create(newUser);
-                }))
-                .flatMap(this::toAuthResult);
+                    .flatMap(existingUser -> Mono.<AppUser>error(new DomainException("User already exists")))
+                    .switchIfEmpty(Mono.defer(() -> {
+                        AppUser newUser = AppUser.create(
+                                UUID.randomUUID(),
+                                normalizedEmail,
+                                passwordHasherPort.hash(command.password()));
+                        return userRepository.create(newUser);
+                    }))
+                    .flatMap(this::toAuthResult);
         });
     }
 
@@ -55,26 +53,25 @@ public class AuthService implements AuthUseCase {
             validateCredentials(command.email(), command.password());
             String normalizedEmail = AppUser.normalizeEmail(command.email());
             return userRepository.findByEmail(normalizedEmail)
-                .switchIfEmpty(Mono.error(new DomainException("Invalid credentials")))
-                .flatMap(user -> {
-                    boolean matches = passwordHasherPort.matches(command.password(), user.passwordHash());
-                    if (!matches) {
-                        return Mono.error(new DomainException("Invalid credentials"));
-                    }
-                    return toAuthResult(user);
-                });
+                    .switchIfEmpty(Mono.error(new DomainException("Invalid credentials")))
+                    .flatMap(user -> {
+                        boolean matches = passwordHasherPort.matches(command.password(), user.passwordHash());
+                        if (!matches) {
+                            return Mono.error(new DomainException("Invalid credentials"));
+                        }
+                        return toAuthResult(user);
+                    });
         });
     }
 
     private Mono<AuthResult> toAuthResult(AppUser user) {
         return authTokenPort.generate(user)
-            .map(token -> new AuthResult(
-                user.id(),
-                user.email(),
-                user.role(),
-                token,
-                "Bearer"
-            ));
+                .map(token -> new AuthResult(
+                        user.id(),
+                        user.email(),
+                        user.roles(),
+                        token,
+                        "Bearer"));
     }
 
     private static void validateCredentials(String email, String password) {

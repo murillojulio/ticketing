@@ -12,19 +12,18 @@ class AppUserTest {
     @Test
     void shouldCreateUserWithNormalizedEmailAndDefaultRole() {
         AppUser user = AppUser.create(
-            UUID.randomUUID(),
-            "User@Example.com",
-            "password-hash"
-        );
+                UUID.randomUUID(),
+                "User@Example.com",
+                "password-hash");
 
         assertThat(user.email()).isEqualTo("user@example.com");
-        assertThat(user.role()).isEqualTo("USER");
+        assertThat(user.roles()).containsExactly("USER");
     }
 
     @Test
     void shouldRejectBlankEmailNormalization() {
         assertThatThrownBy(() -> AppUser.normalizeEmail(" "))
-            .isInstanceOf(DomainException.class)
-            .hasMessageContaining("email");
+                .isInstanceOf(DomainException.class)
+                .hasMessageContaining("email");
     }
 }

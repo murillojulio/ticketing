@@ -6,6 +6,7 @@ import static org.mockito.Mockito.when;
 import com.ticketing.platform.application.model.AuthResult;
 import com.ticketing.platform.application.port.in.AuthUseCase;
 import com.ticketing.platform.domain.exception.DomainException;
+import java.util.Set;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,13 +19,10 @@ import org.springframework.http.MediaType;
 import org.springframework.test.web.reactive.server.WebTestClient;
 import reactor.core.publisher.Mono;
 
-@WebFluxTest(
-    controllers = AuthController.class,
-    excludeAutoConfiguration = {
+@WebFluxTest(controllers = AuthController.class, excludeAutoConfiguration = {
         ReactiveSecurityAutoConfiguration.class,
         ReactiveUserDetailsServiceAutoConfiguration.class
-    }
-)
+})
 @Import(GlobalExceptionHandler.class)
 class AuthControllerTest {
 
@@ -40,7 +38,7 @@ class AuthControllerTest {
             new AuthResult(
                 UUID.randomUUID(),
                 "user@example.com",
-                "USER",
+                Set.of("USER"),
                 "jwt-token",
                 "Bearer"
             )
@@ -68,7 +66,7 @@ class AuthControllerTest {
             new AuthResult(
                 UUID.randomUUID(),
                 "user@example.com",
-                "USER",
+                Set.of("USER"),
                 "jwt-token",
                 "Bearer"
             )
@@ -92,18 +90,18 @@ class AuthControllerTest {
     @Test
     void shouldValidateAuthRequest() {
         webTestClient.post()
-            .uri("/api/auth/register")
-            .contentType(MediaType.APPLICATION_JSON)
-            .bodyValue("""
-                {
-                  "email": "invalid-email",
-                  "password": "123"
-                }
-                """)
-            .exchange()
-            .expectStatus().isBadRequest()
-            .expectBody()
-            .jsonPath("$.status").isEqualTo(400);
+                .uri("/api/auth/register")
+                .contentType(MediaType.APPLICATION_JSON)
+                .bodyValue("""
+                        {
+                          "email": "invalid-email",
+                          "password": "123"
+                        }
+                        """)
+                .exchange()
+                .expectStatus().isBadRequest()
+                .expectBody()
+                .jsonPath("$.status").isEqualTo(400);
     }
 
     @Test

@@ -3,6 +3,7 @@ package com.ticketing.platform.infrastructure.persistence.inmemory;
 import com.ticketing.platform.application.port.out.UserRepository;
 import com.ticketing.platform.domain.exception.DomainException;
 import com.ticketing.platform.domain.model.AppUser;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -27,5 +28,22 @@ public class InMemoryUserRepository implements UserRepository {
     @Override
     public Mono<AppUser> findByEmail(String email) {
         return Mono.justOrEmpty(usersByEmail.get(AppUser.normalizeEmail(email)));
+    }
+
+    @Override
+    public Mono<AppUser> findById(UUID id) {
+        return Mono.justOrEmpty(
+                usersByEmail.values().stream()
+                        .filter(u -> u.id().equals(id))
+                        .findFirst());
+    }
+
+    @Override
+    public Mono<AppUser> update(AppUser user) {
+        if (!usersByEmail.containsKey(AppUser.normalizeEmail(user.email()))) {
+            return Mono.error(new DomainException("User not found"));
+        }
+        usersByEmail.put(AppUser.normalizeEmail(user.email()), user);
+        return Mono.just(user);
     }
 }
