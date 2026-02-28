@@ -25,7 +25,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         const stored: StoredAuth = {
           token: res.token,
           email: res.email,
-          role: res.role,
+          roles: res.roles,
           userId: res.userId
         };
         saveAuth(stored);

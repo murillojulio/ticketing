@@ -22,12 +22,16 @@ public class RoleInitializer implements ApplicationListener<ApplicationReadyEven
     public void onApplicationEvent(ApplicationReadyEvent event) {
         // Initialize default roles
         initRole("ADMIN", Set.of("role:read", "role:write", "user_role:write", "event:read", "event:write",
-                "order:read", "order:write")).subscribe();
+                "order:read", "order:write", "user:read", "user:write")).subscribe();
         initRole("USER", Set.of("event:read", "order:read", "order:write")).subscribe();
     }
 
     private Mono<Role> initRole(String name, Set<String> permissions) {
         return roleRepository.findByName(name)
+                .flatMap(existingRole -> {
+                    Role updatedRole = new Role(existingRole.id(), name, permissions);
+                    return roleRepository.update(updatedRole);
+                })
                 .switchIfEmpty(Mono.defer(() -> {
                     Role role = new Role(UUID.randomUUID(), name, permissions);
                     return roleRepository.create(role);

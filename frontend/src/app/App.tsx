@@ -8,6 +8,7 @@ import { ProtectedRoute } from './ProtectedRoute';
 import { EventsPage } from '../pages/EventsPage';
 import { LoginPage } from '../pages/LoginPage';
 import { OrdersPage } from '../pages/OrdersPage';
+import { UserManagementPage } from '../pages/UserManagementPage';
 
 function ShellRoutes() {
   const [opened, { toggle }] = useDisclosure();
@@ -28,7 +29,7 @@ function ShellRoutes() {
           </Group>
           <Group gap="sm">
             <Text size="sm" c="dimmed">
-              {auth?.email} ({auth?.role})
+              {auth?.email} ({auth?.roles?.join(', ')})
             </Text>
             <Button variant="subtle" onClick={logout}>
               Salir
@@ -50,6 +51,14 @@ function ShellRoutes() {
           to="/orders"
           active={location.pathname.startsWith('/orders')}
         />
+        {auth?.roles?.includes('ADMIN') && (
+          <NavLink
+            label="Usuarios (Admin)"
+            component={Link}
+            to="/admin/users"
+            active={location.pathname.startsWith('/admin/users')}
+          />
+        )}
       </AppShell.Navbar>
 
       <AppShell.Main>
@@ -57,6 +66,7 @@ function ShellRoutes() {
           <Route path="/" element={<Navigate to="/events" replace />} />
           <Route path="/events" element={<EventsPage />} />
           <Route path="/orders" element={<OrdersPage />} />
+          <Route path="/admin/users" element={<UserManagementPage />} />
           <Route path="*" element={<Navigate to="/events" replace />} />
         </Routes>
       </AppShell.Main>

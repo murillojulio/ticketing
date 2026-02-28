@@ -8,6 +8,7 @@ import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
 import org.springframework.data.mongodb.core.query.Criteria;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -43,5 +44,17 @@ public class MongoUserRepository implements UserRepository {
     public Mono<AppUser> findById(UUID id) {
         return mongoTemplate.findById(id.toString(), UserDocument.class)
                 .map(UserDocument::toDomain);
+    }
+
+    @Override
+    public Flux<AppUser> findAll() {
+        return mongoTemplate.findAll(UserDocument.class)
+                .map(UserDocument::toDomain);
+    }
+
+    @Override
+    public Mono<Void> deleteById(UUID id) {
+        Query query = Query.query(Criteria.where("id").is(id.toString()));
+        return mongoTemplate.remove(query, UserDocument.class).then();
     }
 }

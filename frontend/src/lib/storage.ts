@@ -3,7 +3,7 @@ const KEY = 'ticketing_admin_auth';
 export type StoredAuth = {
   token: string;
   email: string;
-  role: string;
+  roles: string[];
   userId: string;
 };
 

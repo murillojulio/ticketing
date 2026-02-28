@@ -3,9 +3,19 @@ export type UUID = string;
 export type AuthResponse = {
   userId: UUID;
   email: string;
-  role: string;
+  roles: string[];
   token: string;
   tokenType: string;
+};
+
+export type UserResponse = {
+  id: UUID;
+  email: string;
+  roles: string[];
+};
+
+export type RoleAssignRequest = {
+  roles: string[];
 };
 
 export type TicketState =

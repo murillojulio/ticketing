@@ -8,6 +8,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.stereotype.Repository;
+import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 @Repository
@@ -45,5 +46,16 @@ public class InMemoryUserRepository implements UserRepository {
         }
         usersByEmail.put(AppUser.normalizeEmail(user.email()), user);
         return Mono.just(user);
+    }
+
+    @Override
+    public Flux<AppUser> findAll() {
+        return Flux.fromIterable(usersByEmail.values());
+    }
+
+    @Override
+    public Mono<Void> deleteById(UUID id) {
+        usersByEmail.values().removeIf(user -> user.id().equals(id));
+        return Mono.empty();
     }
 }

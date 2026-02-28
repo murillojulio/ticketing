@@ -3,12 +3,16 @@ import type {
   EventAvailabilityResponse,
   EventResponse,
   OrderResponse,
-  UUID
+  UUID,
+  UserResponse,
+  RoleAssignRequest
 } from '../app/types';
 import { httpJson } from './http';
 
 export type LoginRequest = { email: string; password: string };
 export type RegisterRequest = { email: string; password: string };
+export type CreateUserRequest = { email: string; password: string; roles: string[] };
+export type UpdateUserRequest = { email: string; roles: string[] };
 
 export type CreateEventRequest = {
   name: string;
@@ -42,6 +46,23 @@ export const api = {
     httpJson<OrderResponse>('/api/orders', { method: 'POST', json: body }),
 
   getOrder: (orderId: UUID) =>
-    httpJson<OrderResponse>(`/api/orders/${orderId}`, { method: 'GET' })
+    httpJson<OrderResponse>(`/api/orders/${orderId}`, { method: 'GET' }),
+
+  listUsers: () => httpJson<UserResponse[]>('/api/users', { method: 'GET' }),
+
+  createUser: (body: CreateUserRequest) =>
+    httpJson<UserResponse>('/api/users', { method: 'POST', json: body }),
+
+  updateUser: (userId: UUID, body: UpdateUserRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}`, { method: 'PUT', json: body }),
+
+  deleteUser: (userId: UUID) =>
+    httpJson<void>(`/api/users/${userId}`, { method: 'DELETE' }),
+
+  assignRoles: (userId: UUID, body: RoleAssignRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}/roles`, { method: 'POST', json: body }),
+
+  removeRoles: (userId: UUID, body: RoleAssignRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}/roles`, { method: 'DELETE', json: body })
 };
 
