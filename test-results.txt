@@ -1,0 +1,80 @@
+﻿[INFO] Scanning for projects...
+[INFO] 
+[INFO] -------------< com.ticketing:reactive-ticketing-platform >--------------
+[INFO] Building reactive-ticketing-platform 1.0.0-SNAPSHOT
+[INFO]   from pom.xml
+[INFO] --------------------------------[ jar ]---------------------------------
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.3/maven-surefire-plugin-3.5.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/plugins/maven-surefire-plugin/3.5.3/maven-surefire-plugin-3.5.3.pom (5.5 kB at 6.9 kB/s)
+[INFO] Downloading from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.5.3/surefire-3.5.3.pom
+[INFO] Downloaded from central: https://repo.maven.apache.org/maven2/org/apache/maven/surefire/surefire/3.5.3/surefire-3.5.3.pom (20 kB at 201 kB/s)
+[INFO] 
+[INFO] --- jacoco:0.8.12:prepare-agent (default) @ reactive-ticketing-platform ---
+[INFO] argLine set to -javaagent:C:\\Users\\julio.murillo\\.m2\\repository\\org\\jacoco\\org.jacoco.agent\\0.8.12\\org.jacoco.agent-0.8.12-runtime.jar=destfile=C:\\dev\\udemy\\backend\\ticketing\\target\\jacoco.exec
+[INFO] 
+[INFO] --- resources:3.3.1:resources (default-resources) @ reactive-ticketing-platform ---
+[INFO] Copying 1 resource from src\main\resources to target\classes
+[INFO] Copying 0 resource from src\main\resources to target\classes
+[INFO] 
+[INFO] --- compiler:3.14.0:compile (default-compile) @ reactive-ticketing-platform ---
+[INFO] Nothing to compile - all classes are up to date.
+[INFO] 
+[INFO] --- resources:3.3.1:testResources (default-testResources) @ reactive-ticketing-platform ---
+[INFO] Copying 1 resource from src\test\resources to target\test-classes
+[INFO] 
+[INFO] --- compiler:3.14.0:testCompile (default-testCompile) @ reactive-ticketing-platform ---
+[INFO] Recompiling the module because of changed source code.
+[INFO] Compiling 41 source files with javac [debug parameters release 17] to target\test-classes
+[INFO] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/application/service/InventoryServiceTest.java: Some input files use unchecked or unsafe operations.
+[INFO] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/application/service/InventoryServiceTest.java: Recompile with -Xlint:unchecked for details.
+[INFO] Some messages have been simplified; recompile with -Xdiags:verbose to get full output
+[INFO] -------------------------------------------------------------
+[WARNING] COMPILATION WARNING : 
+[INFO] -------------------------------------------------------------
+[WARNING] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/AuthControllerTest.java:[34,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/EventControllerTest.java:[37,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/OrderControllerTest.java:[37,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[WARNING] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/PaymentWebhookControllerTest.java:[32,6] org.springframework.boot.test.mock.mockito.MockBean in org.springframework.boot.test.mock.mockito has been deprecated and marked for removal
+[INFO] 4 warnings 
+[INFO] -------------------------------------------------------------
+[INFO] -------------------------------------------------------------
+[ERROR] COMPILATION ERROR : 
+[INFO] -------------------------------------------------------------
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/domain/model/AppUserTest.java:[21,24] cannot find symbol
+  symbol:   method role()
+  location: variable user of type com.ticketing.platform.domain.model.AppUser
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/domain/model/OrderTest.java:[31,38] cannot find symbol
+  symbol:   method getFirst()
+  location: interface java.util.List<com.ticketing.platform.domain.model.AuditEntry>
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/security/JwtTokenServiceTest.java:[28,29] cannot find symbol
+  symbol:   method role()
+  location: variable principal of type com.ticketing.platform.infrastructure.security.JwtPrincipal
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/AuthControllerTest.java:[43,17] incompatible types: java.lang.String cannot be converted to java.util.Set<java.lang.String>
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/AuthControllerTest.java:[71,17] incompatible types: java.lang.String cannot be converted to java.util.Set<java.lang.String>
+[INFO] 5 errors 
+[INFO] -------------------------------------------------------------
+[INFO] ------------------------------------------------------------------------
+[INFO] BUILD FAILURE
+[INFO] ------------------------------------------------------------------------
+[INFO] Total time:  15.409 s
+[INFO] Finished at: 2026-02-27T16:57:37-05:00
+[INFO] ------------------------------------------------------------------------
+[ERROR] Failed to execute goal org.apache.maven.plugins:maven-compiler-plugin:3.14.0:testCompile (default-testCompile) on project reactive-ticketing-platform: Compilation failure: Compilation failure: 
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/domain/model/AppUserTest.java:[21,24] cannot find symbol
+[ERROR]   symbol:   method role()
+[ERROR]   location: variable user of type com.ticketing.platform.domain.model.AppUser
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/domain/model/OrderTest.java:[31,38] cannot find symbol
+[ERROR]   symbol:   method getFirst()
+[ERROR]   location: interface java.util.List<com.ticketing.platform.domain.model.AuditEntry>
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/security/JwtTokenServiceTest.java:[28,29] cannot find symbol
+[ERROR]   symbol:   method role()
+[ERROR]   location: variable principal of type com.ticketing.platform.infrastructure.security.JwtPrincipal
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/AuthControllerTest.java:[43,17] incompatible types: java.lang.String cannot be converted to java.util.Set<java.lang.String>
+[ERROR] /C:/dev/udemy/backend/ticketing/src/test/java/com/ticketing/platform/infrastructure/web/AuthControllerTest.java:[71,17] incompatible types: java.lang.String cannot be converted to java.util.Set<java.lang.String>
+[ERROR] -> [Help 1]
+[ERROR] 
+[ERROR] To see the full stack trace of the errors, re-run Maven with the -e switch.
+[ERROR] Re-run Maven using the -X switch to enable full debug logging.
+[ERROR] 
+[ERROR] For more information about the errors and possible solutions, please read the following articles:
+[ERROR] [Help 1] http://cwiki.apache.org/confluence/display/MAVEN/MojoFailureException

@@ -1,0 +1,68 @@
+import type {
+  AuthResponse,
+  EventAvailabilityResponse,
+  EventResponse,
+  OrderResponse,
+  UUID,
+  UserResponse,
+  RoleAssignRequest
+} from '../app/types';
+import { httpJson } from './http';
+
+export type LoginRequest = { email: string; password: string };
+export type RegisterRequest = { email: string; password: string };
+export type CreateUserRequest = { email: string; password: string; roles: string[] };
+export type UpdateUserRequest = { email: string; roles: string[] };
+
+export type CreateEventRequest = {
+  name: string;
+  date: string; // ISO instant
+  venue: string;
+  totalCapacity: number;
+};
+
+export type CreateOrderRequest = {
+  eventId: UUID;
+  customerId: string;
+  quantity: number;
+};
+
+export const api = {
+  register: (body: RegisterRequest) =>
+    httpJson<AuthResponse>('/api/auth/register', { method: 'POST', json: body, auth: false }),
+
+  login: (body: LoginRequest) =>
+    httpJson<AuthResponse>('/api/auth/login', { method: 'POST', json: body, auth: false }),
+
+  listEvents: () => httpJson<EventResponse[]>('/api/events', { method: 'GET' }),
+
+  createEvent: (body: CreateEventRequest) =>
+    httpJson<EventResponse>('/api/events', { method: 'POST', json: body }),
+
+  getAvailability: (eventId: UUID) =>
+    httpJson<EventAvailabilityResponse>(`/api/events/${eventId}/availability`, { method: 'GET' }),
+
+  createOrder: (body: CreateOrderRequest) =>
+    httpJson<OrderResponse>('/api/orders', { method: 'POST', json: body }),
+
+  getOrder: (orderId: UUID) =>
+    httpJson<OrderResponse>(`/api/orders/${orderId}`, { method: 'GET' }),
+
+  listUsers: () => httpJson<UserResponse[]>('/api/users', { method: 'GET' }),
+
+  createUser: (body: CreateUserRequest) =>
+    httpJson<UserResponse>('/api/users', { method: 'POST', json: body }),
+
+  updateUser: (userId: UUID, body: UpdateUserRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}`, { method: 'PUT', json: body }),
+
+  deleteUser: (userId: UUID) =>
+    httpJson<void>(`/api/users/${userId}`, { method: 'DELETE' }),
+
+  assignRoles: (userId: UUID, body: RoleAssignRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}/roles`, { method: 'POST', json: body }),
+
+  removeRoles: (userId: UUID, body: RoleAssignRequest) =>
+    httpJson<UserResponse>(`/api/users/${userId}/roles`, { method: 'DELETE', json: body })
+};
+

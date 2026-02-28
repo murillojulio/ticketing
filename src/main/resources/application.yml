@@ -1,0 +1,34 @@
+spring:
+  application:
+    name: reactive-ticketing-platform
+  data:
+    mongodb:
+      uri: ${MONGODB_URI:mongodb://localhost:27017/ticketing}
+
+server:
+  port: 8080
+
+ticketing:
+  adapters:
+    persistence: ${TICKETING_ADAPTERS_PERSISTENCE:mongo}
+    queue: ${TICKETING_ADAPTERS_QUEUE:sqs}
+  reservation-hold: PT10M
+  queue-retry-attempts: 3
+  consumer-concurrency: 4
+  expiration-check-interval-ms: 30000
+  sqs:
+    endpoint: ${TICKETING_SQS_ENDPOINT:http://localhost:4566}
+    region: ${TICKETING_SQS_REGION:us-east-1}
+    access-key: ${TICKETING_SQS_ACCESS_KEY:test}
+    secret-key: ${TICKETING_SQS_SECRET_KEY:test}
+    queue-name: ${TICKETING_SQS_QUEUE_NAME:ticketing-order-processing}
+    payment-queue-name: ${TICKETING_SQS_PAYMENT_QUEUE_NAME:ticketing-payment-events}
+    max-messages: ${TICKETING_SQS_MAX_MESSAGES:10}
+    wait-time-seconds: ${TICKETING_SQS_WAIT_TIME_SECONDS:10}
+    visibility-timeout-seconds: ${TICKETING_SQS_VISIBILITY_TIMEOUT_SECONDS:45}
+    poll-interval-ms: ${TICKETING_SQS_POLL_INTERVAL_MS:200}
+  security:
+    enabled: ${TICKETING_SECURITY_ENABLED:true}
+    jwt:
+      secret: ${TICKETING_SECURITY_JWT_SECRET:change-this-default-secret-to-a-very-long-random-value-at-least-thirty-two-bytes}
+      expiration-minutes: ${TICKETING_SECURITY_JWT_EXPIRATION_MINUTES:60}

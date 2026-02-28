@@ -1,0 +1,6 @@
+ticketing:
+  adapters:
+    persistence: inmemory
+    queue: inmemory
+  security:
+    enabled: false

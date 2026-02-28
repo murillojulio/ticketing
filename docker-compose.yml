@@ -1,0 +1,55 @@
+version: "3.9"
+
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: reactive-ticketing-app
+    ports:
+      - "8080:8080"
+    environment:
+      MONGODB_URI: mongodb://mongodb:27017/ticketing
+      TICKETING_ADAPTERS_PERSISTENCE: mongo
+      TICKETING_ADAPTERS_QUEUE: sqs
+      TICKETING_RESERVATION_HOLD: PT10M
+      TICKETING_QUEUE_RETRY_ATTEMPTS: 3
+      TICKETING_CONSUMER_CONCURRENCY: 4
+      TICKETING_EXPIRATION_CHECK_INTERVAL_MS: 30000
+      TICKETING_SQS_ENDPOINT: http://localstack:4566
+      TICKETING_SQS_REGION: us-east-1
+      TICKETING_SQS_ACCESS_KEY: test
+      TICKETING_SQS_SECRET_KEY: test
+      TICKETING_SQS_QUEUE_NAME: ticketing-order-processing
+      TICKETING_SQS_PAYMENT_QUEUE_NAME: ticketing-payment-events
+    depends_on:
+      - mongodb
+      - localstack
+
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: reactive-ticketing-frontend
+    ports:
+      - "5173:80"
+    depends_on:
+      - app
+
+  mongodb:
+    image: mongo:8.0
+    container_name: reactive-ticketing-mongodb
+    environment:
+      MONGO_INITDB_DATABASE: ticketing
+    ports:
+      - "27017:27017"
+
+  localstack:
+    image: localstack/localstack:latest
+    container_name: reactive-ticketing-localstack
+    ports:
+      - "4566:4566"
+    environment:
+      SERVICES: sqs
+      AWS_DEFAULT_REGION: us-east-1
+      DEBUG: 0
